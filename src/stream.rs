@@ -198,7 +198,7 @@ impl ReadStream {
     /// If `cb` returns an error, this function will still try to enqueue the buffer again. If that
     /// fails, the error that occurred during enqueuing will be returned, if it succeeds, the error
     /// returned by `cb` will be returned.
-    pub fn dequeue<T>(&mut self, cb: impl FnOnce(ReadBufferView<'_>) -> Result<T>) -> Result<T> {
+    pub fn dequeue<V>(&mut self, cb: impl FnOnce(ReadBufferView<'_>) -> V) -> Result<V> {
         let mut buf: raw::Buffer = unsafe { mem::zeroed() };
         buf.type_ = self.buf_type;
         buf.memory = self.mem_type;
@@ -221,7 +221,7 @@ impl ReadStream {
 
         self.enqueue(buf.index)?;
 
-        res
+        Ok(res)
     }
 }
 
