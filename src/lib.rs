@@ -15,6 +15,7 @@ mod raw;
 mod shared;
 pub mod stream;
 pub mod uvc;
+mod error;
 
 use nix::errno::Errno;
 use pixelformat::Pixelformat;
@@ -38,8 +39,8 @@ pub use shared::{
     AnalogStd, CapabilityFlags, Fract, InputCapabilities, InputStatus, InputType,
     OutputCapabilities, OutputType,
 };
+pub use error::Error;
 
-pub type Error = Box<dyn std::error::Error + Send + Sync>;
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Returns an iterator over all connected V4L2 devices.
@@ -197,7 +198,7 @@ impl Device {
     ///
     /// The returned `Format` variant will match `buf_type`.
     ///
-    /// If no format is set, this returns `EINVAL`.
+    /// If no format is set, this returns [`Error::UnsupportedBufferType`].
     pub fn format(&self, buf_type: BufType) -> Result<Format> {
         unsafe {
             let mut format = raw::Format {
@@ -206,7 +207,7 @@ impl Device {
             };
             raw::g_fmt(self.fd(), &mut format)?;
             let fmt = Format::from_raw(format)
-                .ok_or_else(|| format!("unsupported buffer type {:?}", buf_type))?;
+                .ok_or_else(|| Error::UnsupportedBufferType(buf_type))?;
             Ok(fmt)
         }
     }
