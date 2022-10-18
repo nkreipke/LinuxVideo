@@ -18,6 +18,8 @@ pub enum Error {
     /// An underlying I/O error has occurred.
     #[error(transparent)]
     Io(#[from] std::io::Error),
+    #[error("buffer offset overflows local word size")]
+    BufferOffsetOverflow
 }
 
 impl From<nix::Error> for Error {

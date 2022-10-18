@@ -82,7 +82,7 @@ impl Buffers {
                     ProtFlags::PROT_READ | ProtFlags::PROT_WRITE,
                     MapFlags::MAP_SHARED,
                     fd,
-                    buf.m.offset.into(),
+                    buf.m.offset.try_into().map_err(|_| Error::BufferOffsetOverflow)?,
                 )?
             };
 
